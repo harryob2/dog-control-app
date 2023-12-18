@@ -1,8 +1,8 @@
 package org.kabiri.android.usbterminal
 
 import android.app.Application
-import com.google.firebase.FirebaseApp
-import com.google.firebase.crashlytics.FirebaseCrashlytics
+//import com.google.firebase.FirebaseApp
+//import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.HiltAndroidApp
 
 /**
@@ -12,8 +12,8 @@ import dagger.hilt.android.HiltAndroidApp
 class MainApplication: Application() {
 
     override fun onCreate() {
-        FirebaseApp.initializeApp(this)
-        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
+//        FirebaseApp.initializeApp(this)
+//        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
         super.onCreate()
     }
 }

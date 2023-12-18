@@ -3,8 +3,8 @@ import java.util.*
 
 plugins {
     id("com.android.application")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
+//    id("com.google.gms.google-services")
+//    id("com.google.firebase.crashlytics")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
     id("dagger.hilt.android.plugin")
@@ -31,19 +31,19 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    signingConfigs {
-
-        val ksName = "keystore.properties"
-        val ksProp = loadKeyStore(ksName)
-        ksProp?.let {
-            create("release") {
-                keyAlias = ksProp.getProperty("release.keyAlias")
-                keyPassword = ksProp.getProperty("release.keyPassword")
-                storeFile = file(ksProp.getProperty("release.file"))
-                storePassword = ksProp.getProperty("release.storePassword")
-            }
-        }
-    }
+//    signingConfigs {
+//
+//        val ksName = "keystore.properties"
+//        val ksProp = loadKeyStore(ksName)
+//        ksProp?.let {
+//            create("release") {
+//                keyAlias = ksProp.getProperty("release.keyAlias")
+//                keyPassword = ksProp.getProperty("release.keyPassword")
+//                storeFile = file(ksProp.getProperty("release.file"))
+//                storePassword = ksProp.getProperty("release.storePassword")
+//            }
+//        }
+//    }
 
     buildTypes {
         named("release") {
@@ -104,65 +104,65 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     ))})
 }
 
-sonarqube {
-    properties {
-        property("sonar.projectKey", System.getenv("SONAR_PROJECT_KEY"))
-        property("sonar.organization", System.getenv("SONAR_ORGANIZATION"))
-        property("sonar.host.url", System.getenv("SONAR_HOST_URL"))
-    }
-}
+//sonarqube {
+//    properties {
+//        property("sonar.projectKey", System.getenv("SONAR_PROJECT_KEY"))
+//        property("sonar.organization", System.getenv("SONAR_ORGANIZATION"))
+//        property("sonar.host.url", System.getenv("SONAR_HOST_URL"))
+//    }
+//}
 
-tasks.register("generateGoogleServicesJson") {
-    doLast {
-        val jsonFileName = "google-services.json"
-        val fileContent = System.getenv("GOOGLE_SERVICES_JSON")
-        File(projectDir, jsonFileName).apply {
-            createNewFile(); writeText(fileContent)
-            println("generated $jsonFileName")
-        }
-    }
-}
+//tasks.register("generateGoogleServicesJson") {
+//    doLast {
+//        val jsonFileName = "google-services.json"
+//        val fileContent = System.getenv("GOOGLE_SERVICES_JSON")
+//        File(projectDir, jsonFileName).apply {
+//            createNewFile(); writeText(fileContent)
+//            println("generated $jsonFileName")
+//        }
+//    }
+//}
 
-tasks.register("generateKsPropFile") {
-    doLast {
-        val configFileName = "keystore.properties"
-        File(projectDir, configFileName).apply {
-            createNewFile()
-            writeText("""
-                # Gradle signing properties for app module
-                release.file=${System.getenv("KS_PATH")}
-                release.storePassword=${System.getenv("KS_PASSWORD")}
-                release.keyAlias=${System.getenv("KS_KEY_ALIAS")}
-                release.keyPassword=${System.getenv("KS_KEY_PASSWORD")}
-                """.trimIndent())
-            println("generated ${this.path}")
-        }
-    }
-}
+//tasks.register("generateKsPropFile") {
+//    doLast {
+//        val configFileName = "keystore.properties"
+//        File(projectDir, configFileName).apply {
+//            createNewFile()
+//            writeText("""
+//                # Gradle signing properties for app module
+//                release.file=${System.getenv("KS_PATH")}
+//                release.storePassword=${System.getenv("KS_PASSWORD")}
+//                release.keyAlias=${System.getenv("KS_KEY_ALIAS")}
+//                release.keyPassword=${System.getenv("KS_KEY_PASSWORD")}
+//                """.trimIndent())
+//            println("generated ${this.path}")
+//        }
+//    }
+//}
 
-tasks.register("generateAppDistKey") {
-    doLast {
-        val jsonFileName = "app-dist-key.json"
-        val fileContent = System.getenv("GOOGLE_APP_DIST_FASTLANE_SERVICE_ACCOUNT")
-        File(rootDir, jsonFileName).apply {
-                createNewFile()
-                writeText(fileContent)
-                println("generated ${this.path}")
-        }
-    }
-}
+//tasks.register("generateAppDistKey") {
+//    doLast {
+//        val jsonFileName = "app-dist-key.json"
+//        val fileContent = System.getenv("GOOGLE_APP_DIST_FASTLANE_SERVICE_ACCOUNT")
+//        File(rootDir, jsonFileName).apply {
+//                createNewFile()
+//                writeText(fileContent)
+//                println("generated ${this.path}")
+//        }
+//    }
+//}
 
-fun loadKeyStore(name: String): Properties? {
-    val ksProp = Properties()
-    val ksPropFile = file(name)
-    return if (ksPropFile.exists()) {
-        ksProp.load(FileInputStream(ksPropFile))
-        ksProp
-    } else {
-        println("ERROR: local keystore file not found")
-        null
-    }
-}
+//fun loadKeyStore(name: String): Properties? {
+//    val ksProp = Properties()
+//    val ksPropFile = file(name)
+//    return if (ksPropFile.exists()) {
+//        ksProp.load(FileInputStream(ksPropFile))
+//        ksProp
+//    } else {
+//        println("ERROR: local keystore file not found")
+//        null
+//    }
+//}
 
 val firebase_bom_version: String by project
 val hilt_version: String by project
@@ -173,9 +173,9 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:$firebase_bom_version"))
-    implementation("com.google.firebase:firebase-analytics-ktx")
-    implementation("com.google.firebase:firebase-crashlytics-ktx")
+//    implementation(platform("com.google.firebase:firebase-bom:$firebase_bom_version"))
+//    implementation("com.google.firebase:firebase-analytics-ktx")
+//    implementation("com.google.firebase:firebase-crashlytics-ktx")
 
     // Dependency Injection
     implementation("com.google.dagger:hilt-android:$hilt_version")
