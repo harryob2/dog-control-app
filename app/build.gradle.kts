@@ -3,7 +3,7 @@ import java.util.*
 
 plugins {
     id("com.android.application")
-//    id("com.google.gms.google-services")
+    id("com.google.gms.google-services")
 //    id("com.google.firebase.crashlytics")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
@@ -180,6 +180,8 @@ dependencies {
 //    implementation(platform("com.google.firebase:firebase-bom:$firebase_bom_version"))
 //    implementation("com.google.firebase:firebase-analytics-ktx")
 //    implementation("com.google.firebase:firebase-crashlytics-ktx")
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+    implementation("com.google.firebase:firebase-analytics")
 
     // Dependency Injection
     implementation("com.google.dagger:hilt-android:$hilt_version")
