@@ -1,4 +1,4 @@
-package org.kabiri.android.usbterminal.arduino
+package com.hobengineering.ssdogapp.arduino
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -8,8 +8,8 @@ import android.hardware.usb.UsbManager
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import org.kabiri.android.usbterminal.Constants
-import org.kabiri.android.usbterminal.R
+import com.hobengineering.ssdogapp.Constants
+import com.hobengineering.ssdogapp.R
 
 /**
  * Created by Ali Kabiri on 13.04.20.

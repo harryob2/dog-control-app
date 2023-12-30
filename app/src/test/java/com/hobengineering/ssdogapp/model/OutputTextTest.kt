@@ -1,6 +1,7 @@
-package org.kabiri.android.usbterminal.model
+package com.hobengineering.ssdogapp.model
 
 import com.google.common.truth.Truth.assertThat
+import com.hobengineering.ssdogapp.model.OutputText
 import org.junit.Test
 
 class OutputTextTest {

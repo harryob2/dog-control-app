@@ -1,4 +1,4 @@
-package org.kabiri.android.usbterminal;
+package com.hobengineering.ssdogapp;
 
 import android.os.Bundle;
 import android.text.SpannableString;
@@ -12,14 +12,19 @@ import android.widget.TextView;
 import androidx.activity.viewModels;
 import androidx.appcompat.app.AppCompatActivity;
 import dagger.hilt.android.AndroidEntryPoint;
-import org.kabiri.android.usbterminal.extensions.scrollToLastLine;
-import org.kabiri.android.usbterminal.viewmodel.MainActivityViewModel;
+import com.hobengineering.ssdogapp.extensions.scrollToLastLine;
+import com.hobengineering.ssdogapp.viewmodel.MainActivityViewModel;
+import android.content.pm.PackageManager;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "MainActivity"
+        private const val REQUEST_CODE_LOCATION = 1
     }
 
     private val viewModel by viewModels<MainActivityViewModel>()
@@ -27,6 +32,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Permission check for ACCESS_FINE_LOCATION
+        if (ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            val permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
+            ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE_LOCATION)
+        }
 
         val tvOutput = findViewById<TextView>(R.id.tvOutput);
         val btOpenValve = findViewById<Button>(R.id.btOpenValve); // Assuming you have a button with this ID in your layout
@@ -83,4 +95,18 @@ class MainActivity : AppCompatActivity() {
         inflater.inflate(R.menu.activity_main_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == REQUEST_CODE_LOCATION && grantResults.isNotEmpty()
+            && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+            throw RuntimeException("Location services are required in order to " + "connect to a reader.")
+        }
+    }
 }
+

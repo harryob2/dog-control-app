@@ -23,8 +23,8 @@ android {
     }
 
     defaultConfig {
-        applicationId = "org.kabiri.android.usbterminal"
-        minSdk = 23
+        applicationId = "com.hobengineering.ssdogapp"
+        minSdk = 26
         targetSdk = 33
         versionCode = System.getenv("CIRCLE_BUILD_NUM")?.toIntOrNull() ?: 13
         versionName = "0.9.12${System.getenv("CIRCLE_BUILD_NUM") ?: ""}"
@@ -71,7 +71,11 @@ android {
         }
     }
 
-    namespace = "org.kabiri.android.usbterminal"
+    namespace = "com.hobengineering.ssdogapp"
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 
 }
 
@@ -188,6 +192,12 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+    implementation("androidx.lifecycle:lifecycle-livedata-core:2.5.1")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.5.1")
+
+
+    // Stripe integration
+    implementation("com.stripe:stripeterminal:3.2.1")
 
     // hilt testing
     // more info:

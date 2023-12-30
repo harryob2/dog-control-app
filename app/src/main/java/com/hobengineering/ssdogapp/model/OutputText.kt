@@ -1,4 +1,4 @@
-package org.kabiri.android.usbterminal.model
+package com.hobengineering.ssdogapp.model
 
 import android.content.Context
 import android.text.style.TextAppearanceSpan

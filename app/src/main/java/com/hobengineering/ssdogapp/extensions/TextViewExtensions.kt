@@ -1,4 +1,4 @@
-package org.kabiri.android.usbterminal.extensions
+package com.hobengineering.ssdogapp.extensions
 
 import android.util.Log
 import android.widget.TextView

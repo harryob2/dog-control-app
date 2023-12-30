@@ -1,4 +1,4 @@
-package org.kabiri.android.usbterminal
+package com.hobengineering.ssdogapp
 
 import android.app.Application
 //import com.google.firebase.FirebaseApp

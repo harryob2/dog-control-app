@@ -1,4 +1,4 @@
-package org.kabiri.android.usbterminal.arduino
+package com.hobengineering.ssdogapp.arduino
 
 import android.app.PendingIntent
 import android.content.Context
@@ -13,8 +13,8 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import com.felhr.usbserial.UsbSerialDevice
 import com.felhr.usbserial.UsbSerialInterface
-import org.kabiri.android.usbterminal.Constants
-import org.kabiri.android.usbterminal.R
+import com.hobengineering.ssdogapp.Constants
+import com.hobengineering.ssdogapp.R
 import javax.inject.Inject
 
 

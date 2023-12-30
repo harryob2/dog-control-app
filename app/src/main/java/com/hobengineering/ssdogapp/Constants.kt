@@ -1,4 +1,4 @@
-package org.kabiri.android.usbterminal
+package com.hobengineering.ssdogapp
 
 /**
  * Created by Ali Kabiri on 13.04.20.

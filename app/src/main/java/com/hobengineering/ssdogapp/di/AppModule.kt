@@ -1,4 +1,4 @@
-package org.kabiri.android.usbterminal.di
+package com.hobengineering.ssdogapp.di
 
 import android.app.Application
 import android.content.Context
@@ -6,9 +6,9 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import org.kabiri.android.usbterminal.arduino.ArduinoHelper
-import org.kabiri.android.usbterminal.arduino.ArduinoPermissionBroadcastReceiver
-import org.kabiri.android.usbterminal.arduino.ArduinoSerialReceiver
+import com.hobengineering.ssdogapp.arduino.ArduinoHelper
+import com.hobengineering.ssdogapp.arduino.ArduinoPermissionBroadcastReceiver
+import com.hobengineering.ssdogapp.arduino.ArduinoSerialReceiver
 
 /**
  * Created by Ali Kabiri on 13.04.20.

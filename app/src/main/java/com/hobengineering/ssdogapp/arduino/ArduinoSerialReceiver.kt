@@ -1,4 +1,4 @@
-package org.kabiri.android.usbterminal.arduino
+package com.hobengineering.ssdogapp.arduino
 
 import android.util.Log
 import androidx.lifecycle.LiveData
