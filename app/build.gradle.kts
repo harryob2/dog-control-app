@@ -9,13 +9,14 @@ plugins {
     id("kotlin-kapt")
     id("dagger.hilt.android.plugin")
     id("jacoco")
+    id("kotlin-android")
 }
 
 repositories {
 }
 
 android {
-    compileSdk = 33
+    compileSdk = 34
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -25,7 +26,7 @@ android {
     defaultConfig {
         applicationId = "com.hobengineering.ssdogapp"
         minSdk = 26
-        targetSdk = 33
+        targetSdk = 34
         versionCode = System.getenv("CIRCLE_BUILD_NUM")?.toIntOrNull() ?: 13
         versionName = "0.9.12${System.getenv("CIRCLE_BUILD_NUM") ?: ""}"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -172,7 +173,7 @@ val firebase_bom_version: String by project
 val hilt_version: String by project
 dependencies {
 
-    implementation("androidx.appcompat:appcompat:1.6.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
@@ -188,18 +189,24 @@ dependencies {
     kapt("com.google.dagger:hilt-compiler:$hilt_version")
 
     // Coroutines
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
-    implementation("androidx.activity:activity-compose:1.6.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation("androidx.activity:activity-compose:1.8.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
-    implementation("androidx.lifecycle:lifecycle-livedata-core:2.5.1")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.5.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("androidx.lifecycle:lifecycle-livedata-core-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
 
 
     // Stripe integration
     implementation("com.stripe:stripeterminal:3.2.1")
+    implementation("com.facebook.stetho:stetho-okhttp3:1.5.1")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    kapt("androidx.lifecycle:lifecycle-compiler:2.6.2")
+    implementation("com.google.android.material:material:1.11.0")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.0")
 
     // hilt testing
     // more info:

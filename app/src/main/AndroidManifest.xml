@@ -23,6 +23,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:dataExtractionRules="@xml/data_extraction_rules"
+        android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="s">
 
         <!-- sentry: replace the empty value with @string/sentry_dsn -->
