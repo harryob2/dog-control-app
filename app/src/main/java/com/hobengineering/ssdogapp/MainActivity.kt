@@ -320,6 +320,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+
         val discoveryListener = object : DiscoveryListener {
             override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
                 runOnUiThread {
