@@ -184,18 +184,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        Log.d("MenuSelection", "Menu item selected: ${item.itemId}")
+
         return when (item.itemId) {
             R.id.actionConnect -> {
-                viewModel.askForConnectionPermission();
-                true;
+                viewModel.askForConnectionPermission()
+                Log.d("MenuSelection", "Connecting...")
+                true
             }
             R.id.actionDisconnect -> {
-                viewModel.disconnect();
-                true;
+                viewModel.disconnect()
+                Log.d("MenuSelection", "Disconnecting...")
+                true
             }
-            else -> super.onOptionsItemSelected(item);
+            else -> {
+                super.onOptionsItemSelected(item)
+            }
         }
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater: MenuInflater = menuInflater;
@@ -313,10 +320,12 @@ class MainActivity : AppCompatActivity() {
         val discoveryCallback = object : Callback {
             override fun onSuccess() {
                 // Update your UI
+                println("successful read")
             }
 
             override fun onFailure(e: TerminalException) {
                 // Update your UI
+                println("unsuccessful read")
             }
         }
 

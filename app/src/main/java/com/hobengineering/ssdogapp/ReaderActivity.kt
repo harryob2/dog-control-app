@@ -18,9 +18,9 @@ class ReaderActivity : AppCompatActivity(), ReaderListener {
 
     // ReaderListener
 
-    override fun onStartInstallingUpdate(update: ReaderSoftwareUpdate, cancelable: Cancelable) {
-        // Show UI communicating that a required update has started installing
-    }
+//    override fun onStartInstallingUpdate(update: ReaderSoftwareUpdate, cancelable: Cancelable) {
+//        // Show UI communicating that a required update has started installing
+//    }
 
     override fun onReportReaderSoftwareUpdateProgress(progress: Float) {
         // Update the progress of the install

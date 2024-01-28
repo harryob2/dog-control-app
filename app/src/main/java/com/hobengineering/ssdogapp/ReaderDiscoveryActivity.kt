@@ -14,11 +14,12 @@ import com.stripe.stripeterminal.external.models.ConnectionConfiguration
 import com.stripe.stripeterminal.external.models.DiscoveryConfiguration
 import com.stripe.stripeterminal.external.models.Reader
 import com.stripe.stripeterminal.external.models.TerminalException
+import com.stripe.stripeterminal.external.callable.ReaderListener
 
-class ReaderDiscoveryActivity : AppCompatActivity(), DiscoveryListener {
+class ReaderDiscoveryActivity : AppCompatActivity(), DiscoveryListener, ReaderListener {
 
     private var selectedReader: Reader? = null
-    private val locationId = "YOUR_LOCATION_ID_HERE"  // Replace with your location ID from Stripe Dashboard
+    private val locationId = "tml_FbH4EQFGg3oHRf"  // Replace with your location ID from Stripe Dashboard
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,7 +36,7 @@ class ReaderDiscoveryActivity : AppCompatActivity(), DiscoveryListener {
     }
 
     private fun discoverReadersAction() {
-        val config = DiscoveryConfiguration.UsbDiscoveryConfiguration()
+        val config = DiscoveryConfiguration.BluetoothDiscoveryConfiguration()
 
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -78,9 +79,9 @@ class ReaderDiscoveryActivity : AppCompatActivity(), DiscoveryListener {
     private fun connectToReader() {
         val reader = selectedReader ?: return
 
-        val connectionConfig = ConnectionConfiguration.UsbConnectionConfiguration(locationId)
+        val connectionConfig = ConnectionConfiguration.BluetoothConnectionConfiguration(locationId)
 
-        Terminal.getInstance().connectUsbReader(reader, connectionConfig, object : ReaderCallback {
+        Terminal.getInstance().connectBluetoothReader(reader, connectionConfig, this, object : ReaderCallback {
             override fun onSuccess(reader: Reader) {
                 println("Successfully connected to reader")
                 // Update your UI here to reflect that the reader is connected
@@ -89,6 +90,7 @@ class ReaderDiscoveryActivity : AppCompatActivity(), DiscoveryListener {
             override fun onFailure(e: TerminalException) {
                 e.printStackTrace()
                 // Update your UI here to reflect the failure
+                println("TerminalException")
             }
         })
     }

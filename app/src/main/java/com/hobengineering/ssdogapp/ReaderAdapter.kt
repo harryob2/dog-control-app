@@ -54,8 +54,9 @@ class ReaderClickListener(val activityRef: WeakReference<MainActivity>) {
         // Since the simulated reader is not associated with a real location, we recommend
         // specifying its existing mock location.
 
-        val connectionConfig =
-            ConnectionConfiguration.BluetoothConnectionConfiguration(reader.location!!.id!!)
+        val locationId = reader.location?.id ?: "tml_FbH4EQFGg3oHRf"
+        val connectionConfig = ConnectionConfiguration.BluetoothConnectionConfiguration(locationId)
+
 
         val readerCallback = object: ReaderCallback {
             override fun onSuccess(reader: Reader) {
