@@ -1,48 +1,44 @@
 package com.hobengineering.ssdogapp;
 
-import android.os.Bundle;
-import android.text.SpannableString;
-import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.TextView;
-import androidx.activity.viewModels;
-import androidx.appcompat.app.AppCompatActivity;
-import dagger.hilt.android.AndroidEntryPoint;
-import com.hobengineering.ssdogapp.extensions.scrollToLastLine;
-import com.hobengineering.ssdogapp.viewmodel.MainActivityViewModel;
-import android.content.pm.PackageManager;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import android.widget.Toast
-
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
+import android.os.Bundle
 import android.provider.Settings
+import android.text.SpannableString
+import android.text.method.ScrollingMovementMethod
+import android.util.Log
 import android.view.ContextThemeWrapper
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
+import android.widget.Button
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.hobengineering.ssdogapp.extensions.scrollToLastLine
+import com.hobengineering.ssdogapp.viewmodel.MainActivityViewModel
 import com.stripe.stripeterminal.Terminal
 import com.stripe.stripeterminal.external.callable.*
-import com.stripe.stripeterminal.external.models.DiscoveryConfiguration
-import com.stripe.stripeterminal.log.LogLevel
 import com.stripe.stripeterminal.external.models.*
-import retrofit2.Call
-import retrofit2.Response
+import com.stripe.stripeterminal.external.models.ConnectionConfiguration.BluetoothConnectionConfiguration
+import com.stripe.stripeterminal.log.LogLevel
+import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
-
 
 
 @AndroidEntryPoint
@@ -126,8 +122,10 @@ class MainActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE_LOCATION)
         }
 
-        val tvOutput = findViewById<TextView>(R.id.tvOutput);
-        val btOpenValve = findViewById<Button>(R.id.btOpenValve); // Assuming you have a button with this ID in your layout
+        val tvOutput = findViewById<TextView>(R.id.tvOutput)
+        val btOpenValve = findViewById<Button>(R.id.btOpenValve)
+        val btPayForDogWash = findViewById<Button>(R.id.btPayForDogWash)
+
 
         // make the text view scrollable:
         tvOutput.movementMethod = ScrollingMovementMethod();
@@ -163,6 +161,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        btPayForDogWash.setOnClickListener {
+            if (Terminal.getInstance().connectedReader == null) {
+                // No reader is connected, start discovery and then payment
+                discoverAndConnectReader()
+            } else {
+                // Reader already connected, start payment directly
+                startPayment()
+            }
+        }
+
 
 
         if (BluetoothAdapter.getDefaultAdapter()?.isEnabled == false) {
@@ -173,13 +181,13 @@ class MainActivity : AppCompatActivity() {
             adapter = readerAdapter
         }
 
-        findViewById<View>(R.id.discover_button).setOnClickListener {
-            discoverReaders()
-        }
-
-        findViewById<View>(R.id.collect_payment_button).setOnClickListener {
-            startPayment()
-        }
+//        findViewById<View>(R.id.discover_button).setOnClickListener {
+//            discoverReaders()
+//        }
+//
+//        findViewById<View>(R.id.collect_payment_button).setOnClickListener {
+//            startPayment()
+//        }
 
     }
 
@@ -227,6 +235,8 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         requestPermissionsIfNecessary()
     }
+
+
 
     private fun isGranted(permission: String): Boolean {
         return ContextCompat.checkSelfPermission(
@@ -286,11 +296,11 @@ class MainActivity : AppCompatActivity() {
 
     fun updateReaderConnection(isConnected: Boolean) {
         val recyclerView = findViewById<RecyclerView>(R.id.reader_recycler_view)
-        findViewById<View>(R.id.collect_payment_button).visibility =
-            if (isConnected) View.VISIBLE else View.INVISIBLE
-        findViewById<View>(R.id.discover_button).visibility =
-            if (isConnected) View.INVISIBLE else View.VISIBLE
-        recyclerView.visibility = if (isConnected) View.INVISIBLE else View.VISIBLE
+//        findViewById<View>(R.id.collect_payment_button).visibility =
+//            if (isConnected) View.VISIBLE else View.INVISIBLE
+//        findViewById<View>(R.id.discover_button).visibility =
+//            if (isConnected) View.INVISIBLE else View.VISIBLE
+//        recyclerView.visibility = if (isConnected) View.INVISIBLE else View.VISIBLE
 
         if (!isConnected) {
             recyclerView.layoutManager = LinearLayoutManager(this)
@@ -387,5 +397,76 @@ class MainActivity : AppCompatActivity() {
         return gpsEnabled
     }
 
+    private fun discoverAndConnectReader() {
+        // Discover readers
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
+        Terminal.getInstance().discoverReaders(discoveryConfig, object : DiscoveryListener {
+            override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
+                if (readers.isNotEmpty()) {
+                    // Automatically connect to the first discovered reader
+                    connectToReader(readers.first())
+                }
+            }
+        }, object : Callback {
+            override fun onSuccess() {
+                Log.d(TAG, "Reader discovery started")
+            }
+
+            override fun onFailure(e: TerminalException) {
+                Log.e(TAG, "Reader discovery failed: ${e.errorMessage}")
+            }
+        })
+    }
+
+    private fun connectToReader(reader: Reader) {
+        println("Attempting to connect to reader: ${reader.serialNumber}")
+
+        val connectionConfig = reader.location?.id?.let {
+            ConnectionConfiguration.BluetoothConnectionConfiguration(
+                it
+            )
+        }
+
+        val readerCallback = object : ReaderCallback {
+            override fun onSuccess(reader: Reader) {
+                println("Successfully connected to reader: ${reader.serialNumber}")
+                runOnUiThread {
+                    updateReaderConnection(isConnected = true)
+                    // Initiate payment after successful connection
+                    startPayment()
+                }
+            }
+
+            override fun onFailure(e: TerminalException) {
+                println("Failed to connect to reader: ${e.localizedMessage}")
+                e.printStackTrace()
+                runOnUiThread {
+                    Toast.makeText(this@MainActivity, "Failed to connect to reader", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        if (connectionConfig != null) {
+            Terminal.getInstance().connectBluetoothReader(
+                reader, connectionConfig, TerminalBluetoothReaderListener(), readerCallback
+            )
+        }
+    }
 
 }

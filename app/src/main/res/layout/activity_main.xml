@@ -43,25 +43,16 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
 
-    <!-- Button to initiate discovery of Stripe readers -->
+    <!-- Button to pay for dog wash -->
     <Button
-        android:id="@+id/discover_button"
+        android:id="@+id/btPayForDogWash"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Discover Readers"
-        app:layout_constraintTop_toTopOf="parent"
+        android:text="Pay for Dog Wash"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <!-- Button to collect payment -->
-    <Button
-        android:id="@+id/collect_payment_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Collect Payment"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
