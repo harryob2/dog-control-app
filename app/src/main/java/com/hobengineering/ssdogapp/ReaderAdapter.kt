@@ -47,36 +47,29 @@ class ReaderAdapter(
 
 class ReaderClickListener(val activityRef: WeakReference<MainActivity>) {
     fun onClick(reader: Reader) {
-        // When connecting to a physical reader, your integration should specify either the
-        // same location as the last connection (reader.locationId) or a new location
-        // of your user's choosing.
-        //
-        // Since the simulated reader is not associated with a real location, we recommend
-        // specifying its existing mock location.
+        println("ReaderClick, Attempting to connect to reader: ${reader.serialNumber}")
 
-        val locationId = reader.location?.id ?: "tml_FbH4EQFGg3oHRf"
-        val connectionConfig = ConnectionConfiguration.BluetoothConnectionConfiguration(locationId)
+        val connectionConfig =
+            ConnectionConfiguration.BluetoothConnectionConfiguration(reader.location!!.id!!)
 
+        println("ReaderClick, Connection configuration set with location ID: ${reader.location!!.id!!}")
 
         val readerCallback = object: ReaderCallback {
             override fun onSuccess(reader: Reader) {
+                println("ReaderCallback, Successfully connected to reader: ${reader.serialNumber}")
                 activityRef.get()?.let {
                     it.runOnUiThread {
-                        // Update UI with connection success
                         it.updateReaderConnection(isConnected = true)
                     }
                 }
             }
 
             override fun onFailure(e: TerminalException) {
+                println("ReaderCallback, Failed to connect to reader: ${e.localizedMessage}")
+                e.printStackTrace()
                 activityRef.get()?.let {
                     it.runOnUiThread {
-                        // Update UI with connection failure
-                        Toast.makeText(
-                            it,
-                            "Failed to connect to reader",
-                            Toast.LENGTH_SHORT)
-                            .show()
+                        Toast.makeText(it, "Failed to connect to reader", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
