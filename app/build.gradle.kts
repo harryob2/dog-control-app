@@ -229,6 +229,10 @@ dependencies {
     androidTestImplementation("androidx.test:runner:1.5.2")
     androidTestImplementation("androidx.test:rules:1.5.0")
 
+    // logging
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.0")
+
+
     /**
      * This library helps to automate some parts of the USB serial connection.
      * For more information, visit: https://github.com/felHR85/UsbSerial

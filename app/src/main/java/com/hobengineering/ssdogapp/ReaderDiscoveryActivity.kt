@@ -19,7 +19,7 @@ import com.stripe.stripeterminal.external.callable.ReaderListener
 class ReaderDiscoveryActivity : AppCompatActivity(), DiscoveryListener, ReaderListener {
 
     private var selectedReader: Reader? = null
-    private val locationId = "tml_FbH4EQFGg3oHRf"  // Replace with your location ID from Stripe Dashboard
+    private val locationId = "tml_FbyHnwfe3BQcWd"  // Replace with your location ID from Stripe Dashboard
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

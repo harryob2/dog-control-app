@@ -45,10 +45,10 @@ import java.lang.ref.WeakReference
 class MainActivity : AppCompatActivity() {
 
     // Register the permissions callback to handles the response to the system permissions dialog.
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions(),
-        ::onPermissionResult
-    )
+//    private val requestPermissionLauncher = registerForActivityResult(
+//        ActivityResultContracts.RequestMultiplePermissions(),
+//        ::onPermissionResult
+//    )
 
     companion object {
         private const val TAG = "MainActivity"
@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
 
         private val paymentIntentParams =
             PaymentIntentParameters.Builder(listOf(PaymentMethodType.CARD_PRESENT))
-                .setAmount(500)
+                .setAmount(50)
                 .setCurrency("eur")
                 .build()
 
@@ -106,14 +106,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private val readerClickListener = ReaderClickListener(WeakReference(this))
-    private val readerAdapter = ReaderAdapter(readerClickListener)
+//    private val readerClickListener = ReaderClickListener(WeakReference(this))
+//    private val readerAdapter = ReaderAdapter(readerClickListener)
 
     private val viewModel by viewModels<MainActivityViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // initialize
+        initialize()
 
         // Permission check for ACCESS_FINE_LOCATION
         if (ContextCompat.checkSelfPermission(this,
@@ -177,9 +180,9 @@ class MainActivity : AppCompatActivity() {
             BluetoothAdapter.getDefaultAdapter().enable()
         }
 
-        findViewById<RecyclerView>(R.id.reader_recycler_view).apply {
-            adapter = readerAdapter
-        }
+//        findViewById<RecyclerView>(R.id.reader_recycler_view).apply {
+//            adapter = readerAdapter
+//        }
 
 //        findViewById<View>(R.id.discover_button).setOnClickListener {
 //            discoverReaders()
@@ -191,122 +194,122 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        Log.d("MenuSelection", "Menu item selected: ${item.itemId}")
-
-        return when (item.itemId) {
-            R.id.actionConnect -> {
-                viewModel.askForConnectionPermission()
-                Log.d("MenuSelection", "Connecting...")
-                true
-            }
-            R.id.actionDisconnect -> {
-                viewModel.disconnect()
-                Log.d("MenuSelection", "Disconnecting...")
-                true
-            }
-            else -> {
-                super.onOptionsItemSelected(item)
-            }
-        }
-    }
-
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val inflater: MenuInflater = menuInflater;
-        inflater.inflate(R.menu.activity_main_menu, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == REQUEST_CODE_LOCATION && grantResults.isNotEmpty()
-            && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-            throw RuntimeException("Location services are required in order to " + "connect to a reader.")
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        requestPermissionsIfNecessary()
-    }
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        Log.d("MenuSelection", "Menu item selected: ${item.itemId}")
+//
+//        return when (item.itemId) {
+//            R.id.actionConnect -> {
+//                viewModel.askForConnectionPermission()
+//                Log.d("MenuSelection", "Connecting...")
+//                true
+//            }
+//            R.id.actionDisconnect -> {
+//                viewModel.disconnect()
+//                Log.d("MenuSelection", "Disconnecting...")
+//                true
+//            }
+//            else -> {
+//                super.onOptionsItemSelected(item)
+//            }
+//        }
+//    }
 
 
+//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+//        val inflater: MenuInflater = menuInflater;
+//        inflater.inflate(R.menu.activity_main_menu, menu);
+//        return super.onCreateOptionsMenu(menu);
+//    }
 
-    private fun isGranted(permission: String): Boolean {
-        return ContextCompat.checkSelfPermission(
-            this,
-            permission
-        ) == PackageManager.PERMISSION_GRANTED
-    }
+//    override fun onRequestPermissionsResult(
+//        requestCode: Int,
+//        permissions: Array<String>,
+//        grantResults: IntArray
+//    ) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//
+//        if (requestCode == REQUEST_CODE_LOCATION && grantResults.isNotEmpty()
+//            && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+//            throw RuntimeException("Location services are required in order to " + "connect to a reader.")
+//        }
+//    }
 
-    private fun requestPermissionsIfNecessary() {
-        if (Build.VERSION.SDK_INT >= 31) {
-            requestPermissionsIfNecessarySdk31()
-        } else {
-            requestPermissionsIfNecessarySdkBelow31()
-        }
-    }
+//    override fun onResume() {
+//        super.onResume()
+//        requestPermissionsIfNecessary()
+//    }
 
-    private fun requestPermissionsIfNecessarySdkBelow31() {
-        // Check for location permissions
-        if (!isGranted(Manifest.permission.ACCESS_FINE_LOCATION)) {
-            // If we don't have them yet, request them before doing anything else
-            requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
-        } else if (!Terminal.isInitialized() && verifyGpsEnabled()) {
-            initialize()
-        }
-    }
 
-    @RequiresApi(Build.VERSION_CODES.S)
-    private fun requestPermissionsIfNecessarySdk31() {
-        // Check for location and bluetooth permissions
-        val deniedPermissions = mutableListOf<String>().apply {
-            if (!isGranted(Manifest.permission.ACCESS_FINE_LOCATION)) add(Manifest.permission.ACCESS_FINE_LOCATION)
-            if (!isGranted(Manifest.permission.BLUETOOTH_CONNECT)) add(Manifest.permission.BLUETOOTH_CONNECT)
-            if (!isGranted(Manifest.permission.BLUETOOTH_SCAN)) add(Manifest.permission.BLUETOOTH_SCAN)
-        }.toTypedArray()
 
-        if (deniedPermissions.isNotEmpty()) {
-            // If we don't have them yet, request them before doing anything else
-            requestPermissionLauncher.launch(deniedPermissions)
-        } else if (!Terminal.isInitialized() && verifyGpsEnabled()) {
-            initialize()
-        }
-    }
+//    private fun isGranted(permission: String): Boolean {
+//        return ContextCompat.checkSelfPermission(
+//            this,
+//            permission
+//        ) == PackageManager.PERMISSION_GRANTED
+//    }
+
+//    private fun requestPermissionsIfNecessary() {
+//        if (Build.VERSION.SDK_INT >= 31) {
+//            requestPermissionsIfNecessarySdk31()
+//        } else {
+//            requestPermissionsIfNecessarySdkBelow31()
+//        }
+//    }
+
+//    private fun requestPermissionsIfNecessarySdkBelow31() {
+//        // Check for location permissions
+//        if (!isGranted(Manifest.permission.ACCESS_FINE_LOCATION)) {
+//            // If we don't have them yet, request them before doing anything else
+//            requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
+//        } else if (!Terminal.isInitialized() && verifyGpsEnabled()) {
+//            initialize()
+//        }
+//    }
+
+//    @RequiresApi(Build.VERSION_CODES.S)
+//    private fun requestPermissionsIfNecessarySdk31() {
+//        // Check for location and bluetooth permissions
+//        val deniedPermissions = mutableListOf<String>().apply {
+//            if (!isGranted(Manifest.permission.ACCESS_FINE_LOCATION)) add(Manifest.permission.ACCESS_FINE_LOCATION)
+//            if (!isGranted(Manifest.permission.BLUETOOTH_CONNECT)) add(Manifest.permission.BLUETOOTH_CONNECT)
+//            if (!isGranted(Manifest.permission.BLUETOOTH_SCAN)) add(Manifest.permission.BLUETOOTH_SCAN)
+//        }.toTypedArray()
+//
+//        if (deniedPermissions.isNotEmpty()) {
+//            // If we don't have them yet, request them before doing anything else
+//            requestPermissionLauncher.launch(deniedPermissions)
+//        } else if (!Terminal.isInitialized() && verifyGpsEnabled()) {
+//            initialize()
+//        }
+//    }
 
     /**
      * Receive the result of our permissions check, and initialize if we can
      */
-    private fun onPermissionResult(result: Map<String, Boolean>) {
-        val deniedPermissions: List<String> = result
-            .filter { !it.value }
-            .map { it.key }
+//    private fun onPermissionResult(result: Map<String, Boolean>) {
+//        val deniedPermissions: List<String> = result
+//            .filter { !it.value }
+//            .map { it.key }
+//
+//        // If we receive a response to our permission check, initialize
+//        if (deniedPermissions.isEmpty() && !Terminal.isInitialized() && verifyGpsEnabled()) {
+//            initialize()
+//        }
+//    }
 
-        // If we receive a response to our permission check, initialize
-        if (deniedPermissions.isEmpty() && !Terminal.isInitialized() && verifyGpsEnabled()) {
-            initialize()
-        }
-    }
-
-    fun updateReaderConnection(isConnected: Boolean) {
-        val recyclerView = findViewById<RecyclerView>(R.id.reader_recycler_view)
+//    fun updateReaderConnection(isConnected: Boolean) {
+//        val recyclerView = findViewById<RecyclerView>(R.id.reader_recycler_view)
 //        findViewById<View>(R.id.collect_payment_button).visibility =
 //            if (isConnected) View.VISIBLE else View.INVISIBLE
 //        findViewById<View>(R.id.discover_button).visibility =
 //            if (isConnected) View.INVISIBLE else View.VISIBLE
 //        recyclerView.visibility = if (isConnected) View.INVISIBLE else View.VISIBLE
-
-        if (!isConnected) {
-            recyclerView.layoutManager = LinearLayoutManager(this)
-            recyclerView.adapter = readerAdapter
-        }
-    }
+//
+//        if (!isConnected) {
+//            recyclerView.layoutManager = LinearLayoutManager(this)
+//            recyclerView.adapter = readerAdapter
+//        }
+//    }
 
     private fun initialize() {
         // Initialize the Terminal as soon as possible
@@ -322,80 +325,80 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        val isConnectedToReader = Terminal.getInstance().connectedReader != null
-        updateReaderConnection(isConnectedToReader)
+//        val isConnectedToReader = Terminal.getInstance().connectedReader != null
+//        updateReaderConnection(isConnectedToReader)
     }
 
-    private fun discoverReaders() {
-        val discoveryCallback = object : Callback {
-            override fun onSuccess() {
-                // Update your UI
-                println("successful read")
-            }
-
-            override fun onFailure(e: TerminalException) {
-                // Update your UI
-                println("unsuccessful read")
-            }
-        }
-
-
-        val discoveryListener = object : DiscoveryListener {
-            override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
-                runOnUiThread {
-                    readerAdapter.updateReaders(readers)
-                }
-            }
-        }
-
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return
-        }
-        Terminal.getInstance().discoverReaders(discoveryConfig, discoveryListener, discoveryCallback)
-    }
+//    private fun discoverReaders() {
+//        val discoveryCallback = object : Callback {
+//            override fun onSuccess() {
+//                // Update your UI
+//                println("successful read")
+//            }
+//
+//            override fun onFailure(e: TerminalException) {
+//                // Update your UI
+//                println("unsuccessful read")
+//            }
+//        }
+//
+//
+//        val discoveryListener = object : DiscoveryListener {
+//            override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
+//                runOnUiThread {
+//                    readerAdapter.updateReaders(readers)
+//                }
+//            }
+//        }
+//
+//        if (ActivityCompat.checkSelfPermission(
+//                this,
+//                Manifest.permission.ACCESS_FINE_LOCATION
+//            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+//                this,
+//                Manifest.permission.ACCESS_COARSE_LOCATION
+//            ) != PackageManager.PERMISSION_GRANTED
+//        ) {
+//            // TODO: Consider calling
+//            //    ActivityCompat#requestPermissions
+//            // here to request the missing permissions, and then overriding
+//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//            //                                          int[] grantResults)
+//            // to handle the case where the user grants the permission. See the documentation
+//            // for ActivityCompat#requestPermissions for more details.
+//            return
+//        }
+//        Terminal.getInstance().discoverReaders(discoveryConfig, discoveryListener, discoveryCallback)
+//    }
 
     private fun startPayment() {
         // Step 1: create payment intent
         Terminal.getInstance().createPaymentIntent(paymentIntentParams, createPaymentIntentCallback)
     }
 
-    private fun verifyGpsEnabled(): Boolean {
-        val locationManager: LocationManager? =
-            applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager?
-        var gpsEnabled = false
-
-        try {
-            gpsEnabled = locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) ?: false
-        } catch (exception: Exception) {}
-
-        if (!gpsEnabled) {
-            // notify user
-            AlertDialog.Builder(ContextThemeWrapper(this, R.style.Theme_MaterialComponents_DayNight_DarkActionBar))
-                .setMessage("Please enable location services")
-                .setCancelable(false)
-                .setPositiveButton("Open location settings") { param, paramInt ->
-                    this.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
-                }
-                .create()
-                .show()
-        }
-
-        return gpsEnabled
-    }
+//    private fun verifyGpsEnabled(): Boolean {
+//        val locationManager: LocationManager? =
+//            applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager?
+//        var gpsEnabled = false
+//
+//        try {
+//            gpsEnabled = locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) ?: false
+//        } catch (exception: Exception) {}
+//
+//        if (!gpsEnabled) {
+//            // notify user
+//            AlertDialog.Builder(ContextThemeWrapper(this, R.style.Theme_MaterialComponents_DayNight_DarkActionBar))
+//                .setMessage("Please enable location services")
+//                .setCancelable(false)
+//                .setPositiveButton("Open location settings") { param, paramInt ->
+//                    this.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+//                }
+//                .create()
+//                .show()
+//        }
+//
+//        return gpsEnabled
+//    }
 
     private fun discoverAndConnectReader() {
         // Discover readers
@@ -437,17 +440,13 @@ class MainActivity : AppCompatActivity() {
     private fun connectToReader(reader: Reader) {
         println("Attempting to connect to reader: ${reader.serialNumber}")
 
-        val connectionConfig = reader.location?.id?.let {
-            ConnectionConfiguration.BluetoothConnectionConfiguration(
-                it
-            )
-        }
+        val connectionConfig = ConnectionConfiguration.BluetoothConnectionConfiguration("tml_Fb4Gcg8m8jPGlE")
 
         val readerCallback = object : ReaderCallback {
             override fun onSuccess(reader: Reader) {
                 println("Successfully connected to reader: ${reader.serialNumber}")
                 runOnUiThread {
-                    updateReaderConnection(isConnected = true)
+//                    updateReaderConnection(isConnected = true)
                     // Initiate payment after successful connection
                     startPayment()
                 }
