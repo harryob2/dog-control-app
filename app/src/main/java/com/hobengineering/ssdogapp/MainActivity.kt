@@ -44,7 +44,7 @@ import java.lang.ref.WeakReference
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    // Register the permissions callback to handles the response to the system permissions dialog.
+    // Register the permissions callback to handles the response to the system permissions dialog. t
 //    private val requestPermissionLauncher = registerForActivityResult(
 //        ActivityResultContracts.RequestMultiplePermissions(),
 //        ::onPermissionResult
