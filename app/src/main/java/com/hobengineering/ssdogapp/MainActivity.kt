@@ -3,45 +3,35 @@ package com.hobengineering.ssdogapp;
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
-import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.LocationManager
-import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.text.SpannableString
-import android.text.method.ScrollingMovementMethod
 import android.util.Log
-import android.view.ContextThemeWrapper
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.hobengineering.ssdogapp.extensions.scrollToLastLine
 import com.hobengineering.ssdogapp.viewmodel.MainActivityViewModel
 import com.stripe.stripeterminal.Terminal
 import com.stripe.stripeterminal.external.callable.*
 import com.stripe.stripeterminal.external.models.*
-import com.stripe.stripeterminal.external.models.ConnectionConfiguration.BluetoothConnectionConfiguration
 import com.stripe.stripeterminal.log.LogLevel
+import com.stripe.stripeterminal.external.callable.PaymentIntentCallback
+import com.stripe.stripeterminal.external.models.PaymentIntent
+import com.stripe.stripeterminal.external.models.TerminalException
 import dagger.hilt.android.AndroidEntryPoint
-import java.lang.ref.WeakReference
 import android.os.CountDownTimer
 import android.speech.tts.TextToSpeech
 import java.util.Locale
+import retrofit2.Callback as RetrofitCallback
+import retrofit2.Response
+import retrofit2.Call
+
 
 
 @AndroidEntryPoint
@@ -180,18 +170,104 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     }
 
-    private val createPaymentIntentCallback by lazy {
-        object : PaymentIntentCallback {
-            override fun onSuccess(paymentIntent: PaymentIntent) {
-                Terminal.getInstance()
-                    .collectPaymentMethod(paymentIntent, collectPaymentMethodCallback)
+
+
+//    private val createPaymentIntentCallback by lazy {
+//        object : PaymentIntentCallback {
+//            override fun onSuccess(paymentIntent: PaymentIntent) {
+//                Terminal.getInstance()
+//                    .collectPaymentMethod(paymentIntent, collectPaymentMethodCallback)
+//            }
+//
+//            override fun onFailure(e: TerminalException) {
+//                // Update UI w/ failure
+//            }
+//        }
+//    }
+
+    // Assume this is called in response to a user action, like clicking a button
+    private fun createPaymentIntent() {
+        ApiClient.createPaymentIntent(51, "eur", object : RetrofitCallback<PaymentIntentResponse> {
+            override fun onResponse(call: Call<PaymentIntentResponse>, response: Response<PaymentIntentResponse>) {
+                if (response.isSuccessful) {
+                    val clientSecret = response.body()?.clientSecret
+                    if (clientSecret != null) {
+                        proceedWithPaymentFlow(clientSecret)
+                    }
+
+                    // Use the clientSecret here to proceed with Stripe payment flow
+                } else {
+                    Log.e(TAG, "Failed to create payment intent: ${response.errorBody()?.string()}")
+                }
             }
 
-            override fun onFailure(e: TerminalException) {
-                // Update UI w/ failure
+            override fun onFailure(call: Call<PaymentIntentResponse>, t: Throwable) {
+                Log.e(TAG, "Error creating payment intent", t)
             }
-        }
+        })
     }
+
+    private fun proceedWithPaymentFlow(clientSecret: String) {
+        Terminal.getInstance().retrievePaymentIntent(clientSecret, object : PaymentIntentCallback {
+            override fun onSuccess(paymentIntent: PaymentIntent) {
+                // At this point, you have successfully retrieved the PaymentIntent
+                // Now, you can proceed to collect a payment method with this paymentIntent
+                collectPaymentMethod(paymentIntent)
+            }
+
+            override fun onFailure(exception: TerminalException) {
+                // Handle the failure to retrieve the PaymentIntent
+                Log.e(TAG, "Failed to retrieve PaymentIntent: ${exception.errorMessage}")
+            }
+        })
+    }
+
+    private fun collectPaymentMethod(paymentIntent: PaymentIntent) {
+        // Use the Terminal SDK to collect a payment method for the retrieved PaymentIntent
+        // This step involves customer interaction with the payment hardware to insert/swipe/tap their card
+        Terminal.getInstance().collectPaymentMethod(paymentIntent, object : PaymentIntentCallback {
+            override fun onSuccess(paymentIntent: PaymentIntent) {
+                // Successfully collected a payment method
+                // You can now proceed to confirm the PaymentIntent to complete the payment
+                confirmPaymentIntent(paymentIntent)
+            }
+
+            override fun onFailure(exception: TerminalException) {
+                // Handle the failure to collect a payment method
+                Log.e(TAG, "Failed to collect payment method: ${exception.errorMessage}")
+            }
+        })
+    }
+
+    private fun confirmPaymentIntent(paymentIntent: PaymentIntent) {
+        // Use the Terminal SDK to confirm the PaymentIntent and complete the payment
+        Terminal.getInstance().confirmPaymentIntent(paymentIntent, object : PaymentIntentCallback {
+            override fun onSuccess(paymentIntent: PaymentIntent) {
+                // Payment was successfully confirmed and completed
+                Log.d(TAG, "PaymentIntent confirmed successfully: ${paymentIntent.id}")
+                runOnUiThread {
+                    val btPayForDogWash = findViewById<Button>(R.id.btPayForDogWash)
+                    val tvCountdown = findViewById<TextView>(R.id.tvCountdown)
+
+                    btPayForDogWash.visibility = View.GONE // Hide the button
+                    tvCountdown.visibility = View.VISIBLE // Show the countdown
+
+                    val successMessage = "Payment successful. You have 20 minutes of water."
+                    speak(successMessage)
+                    Toast.makeText(applicationContext, successMessage, Toast.LENGTH_LONG).show()
+
+                    startCountdown(tvCountdown, 20 * 60 * 1000) // 20 minutes in milliseconds
+                }
+
+            }
+
+            override fun onFailure(exception: TerminalException) {
+                // Handle the failure to confirm the PaymentIntent
+                Log.e(TAG, "Failed to confirm PaymentIntent: ${exception.errorMessage}")
+            }
+        })
+    }
+
 
     // Step 3 - we've collected the payment method, so it's time to confirm the payment
     private val collectPaymentMethodCallback by lazy {
@@ -235,7 +311,8 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     private fun startPayment() {
         // Step 1: create payment intent
-        Terminal.getInstance().createPaymentIntent(paymentIntentParams, createPaymentIntentCallback)
+//        Terminal.getInstance().createPaymentIntent(paymentIntentParams, createPaymentIntentCallback)
+        createPaymentIntent()
     }
 
     private fun discoverAndConnectReader() {
@@ -312,11 +389,13 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 // Milestone notifications
                 when (minutes) {
                     15L, 10L, 5L, 2L -> {
-                        val message = "$minutes minutes remaining."
-                        speak(message)
-                        Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
+                        if (seconds == 0L) { // To ensure it only triggers once at exactly 1 minute left
+                            val message = "$minutes minutes remaining."
+                            speak(message)
+                            Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
+                        }
                     }
-                    1L -> if (seconds == 0L) { // To ensure it only triggers once at exactly 1 minute left
+                    1L -> if (seconds == 0L) {
                         val message = "1 minute remaining."
                         speak(message)
                         Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()

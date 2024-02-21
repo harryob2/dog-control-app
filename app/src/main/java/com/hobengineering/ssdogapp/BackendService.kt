@@ -5,6 +5,7 @@ import retrofit2.Call
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
+import retrofit2.http.Body
 
 /**
  * The 'BackendService' interface handles the two simple calls we need to make to our backend.
@@ -18,6 +19,9 @@ interface BackendService {
     @POST("connection_token")
     fun getConnectionToken(): Call<ConnectionToken>
 
+
+    @POST("create_payment_intent")
+    fun createPaymentIntent(@Body request: PaymentIntentRequest): Call<PaymentIntentResponse>
 
     /**
      * Capture a specific payment intent on our backend

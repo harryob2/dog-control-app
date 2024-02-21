@@ -6,8 +6,10 @@ import com.stripe.stripeterminal.external.models.ConnectionTokenException
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.Callback as RetrofitCallback
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
+
 
 // The 'ApiClient' is a singleton object used to make calls to our backend and return their results
 object ApiClient {
@@ -49,5 +51,10 @@ object ApiClient {
 
     internal fun capturePaymentIntent(id: String) {
         service.capturePaymentIntent(id).execute()
+    }
+
+    fun createPaymentIntent(amount: Int, currency: String, callback: RetrofitCallback<PaymentIntentResponse>) {
+        val request = PaymentIntentRequest(amount, currency)
+        service.createPaymentIntent(request).enqueue(callback)
     }
 }
