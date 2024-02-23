@@ -32,6 +32,8 @@ import retrofit2.Callback as RetrofitCallback
 import retrofit2.Response
 import retrofit2.Call
 import android.os.Build
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 
 
@@ -277,27 +279,12 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             override fun onSuccess(paymentIntent: PaymentIntent) {
                 // Payment was successfully confirmed and completed
                 Log.d(TAG, "PaymentIntent confirmed successfully: ${paymentIntent.id}")
-//                viewModel.askForConnectionPermission()
-//                viewModel.getGrantedDevice().observe(this@MainActivity) { device ->
-//                    viewModel.openDeviceAndPort(device)
-//                }
-//                viewModel.serialWrite("O")
                 runOnUiThread {
-                    val btPayForDogWash = findViewById<Button>(R.id.btPayForDogWash)
-                    val tvCountdown = findViewById<TextView>(R.id.tvCountdown)
-
-
-
-                    btPayForDogWash.visibility = View.GONE // Hide the button
-                    tvCountdown.visibility = View.VISIBLE // Show the countdown
-
-                    val successMessage = "Payment successful. You have 20 minutes of water."
-                    speak(successMessage)
-                    Toast.makeText(applicationContext, successMessage, Toast.LENGTH_LONG).show()
-
-                    startCountdown(tvCountdown, 20 * 60 * 1000) // 20 minutes in milliseconds
+                    // Send serial command to arduino
+                    connectArduinoAndSendSerialCommand()
+                    // UI updates after confirming payment
+                    updateUIAfterPaymentConfirmation()
                 }
-
             }
 
             override fun onFailure(exception: TerminalException) {
@@ -305,6 +292,46 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 Log.e(TAG, "Failed to confirm PaymentIntent: ${exception.errorMessage}")
             }
         })
+    }
+
+    private fun connectArduinoAndSendSerialCommand() {
+        viewModel.askForConnectionPermission()
+
+        // Observe the granted device LiveData
+        viewModel.getGrantedDevice().observe(this@MainActivity) { device ->
+            // Ensure device connection before sending the serial command
+            // Launch a coroutine in the lifecycleScope of the Activity or Fragment
+            lifecycleScope.launch {
+                // Wait for the openDeviceAndPort Job to complete
+                viewModel.openDeviceAndPort(device).join()
+
+                // After completion, perform the serial write operation
+//                        val success = viewModel.serialWrite("O")
+                if (!viewModel.serialWrite("O")) {
+                    Log.e(TAG, "The 'Open Valve' command was not sent to Arduino")
+                } else {
+                    // The serial command was successfully sent, proceed with UI updates or other logic as needed
+                    Log.e(TAG, "O command successfully sent apparently")
+                }
+            }
+        }
+
+    }
+
+    private fun updateUIAfterPaymentConfirmation() {
+        val btPayForDogWash = findViewById<Button>(R.id.btPayForDogWash)
+        val tvCountdown = findViewById<TextView>(R.id.tvCountdown)
+
+        btPayForDogWash.visibility = View.GONE // Hide the button
+        tvCountdown.visibility = View.VISIBLE // Show the countdown
+
+        val successMessage = "Payment successful. You have 20 minutes of water."
+        speak(successMessage)
+        Toast.makeText(applicationContext, successMessage, Toast.LENGTH_LONG).show()
+
+//        startCountdown(tvCountdown, 20 * 60 * 1000) // 20 minutes in milliseconds
+        startCountdown(tvCountdown, 5000) // 20 minutes in milliseconds
+
     }
 
 
@@ -448,7 +475,10 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 tvCountdown.text = "00:00"
                 val finishMessage = "Time is up. You can now dry your dog."
                 speak(finishMessage)
-                Toast.makeText(applicationContext, finishMessage, Toast.LENGTH_LONG).show()
+                Toast.makeText(applicationContext, finishMessage, Toast.LENGTH_LONG).show() // Show little pop up message
+                btPayForDogWash.visibility = View.VISIBLE // Show the button
+                tvCountdown.visibility = View.GONE // Hide the countdown
+
             }
         }.start()
     }
