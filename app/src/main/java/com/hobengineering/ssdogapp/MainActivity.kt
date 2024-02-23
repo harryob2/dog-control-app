@@ -31,6 +31,7 @@ import java.util.Locale
 import retrofit2.Callback as RetrofitCallback
 import retrofit2.Response
 import retrofit2.Call
+import android.os.Build
 
 
 
@@ -41,7 +42,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private lateinit var btPayForDogWash: Button
     private lateinit var tvCountdown: TextView
 
-    // Register the permissions callback to handles the response to the system permissions dialog. t
+//     Register the permissions callback to handles the response to the system permissions dialog. t
 //    private val requestPermissionLauncher = registerForActivityResult(
 //        ActivityResultContracts.RequestMultiplePermissions(),
 //        ::onPermissionResult
@@ -50,12 +51,13 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     companion object {
         private const val TAG = "MainActivity"
         private const val REQUEST_CODE_LOCATION = 1
+        private const val REQUEST_CODE_BLUETOOTH_PERMISSIONS = 102
 
-        private val paymentIntentParams =
-            PaymentIntentParameters.Builder(listOf(PaymentMethodType.CARD_PRESENT))
-                .setAmount(50)
-                .setCurrency("eur")
-                .build()
+//        private val paymentIntentParams =
+//            PaymentIntentParameters.Builder(listOf(PaymentMethodType.CARD_PRESENT))
+//                .setAmount(50)
+//                .setCurrency("eur")
+//                .build()
 
         private val discoveryConfig =
             DiscoveryConfiguration.BluetoothDiscoveryConfiguration(isSimulated = false)
@@ -81,6 +83,9 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             val permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
             ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE_LOCATION)
         }
+
+        // Permission check for Bluetooth
+        requestBluetoothPermissions()
 
         tts = TextToSpeech(this, this)
         val tvOutput = findViewById<TextView>(R.id.tvOutput)
@@ -168,6 +173,33 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             )
         }
 
+    }
+
+    // Function to request Bluetooth permissions
+    private fun requestBluetoothPermissions() {
+        // Check for Android version
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // Permissions required for Bluetooth scanning and connecting on Android 12 and above
+            val requiredPermissions = arrayOf(
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_CONNECT
+            )
+
+            // Check if permissions are granted
+            val allPermissionsGranted = requiredPermissions.all { permission ->
+                ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+            }
+
+            if (!allPermissionsGranted) {
+                // Request permissions
+                ActivityCompat.requestPermissions(this, requiredPermissions, REQUEST_CODE_BLUETOOTH_PERMISSIONS)
+            }
+        } else {
+            // For Android versions below Android 12, ACCESS_FINE_LOCATION is typically required for Bluetooth operations
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_CODE_LOCATION)
+            }
+        }
     }
 
 
