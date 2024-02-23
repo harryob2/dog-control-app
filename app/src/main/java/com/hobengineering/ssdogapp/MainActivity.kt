@@ -206,19 +206,6 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
 
 
-//    private val createPaymentIntentCallback by lazy {
-//        object : PaymentIntentCallback {
-//            override fun onSuccess(paymentIntent: PaymentIntent) {
-//                Terminal.getInstance()
-//                    .collectPaymentMethod(paymentIntent, collectPaymentMethodCallback)
-//            }
-//
-//            override fun onFailure(e: TerminalException) {
-//                // Update UI w/ failure
-//            }
-//        }
-//    }
-
     // Assume this is called in response to a user action, like clicking a button
     private fun createPaymentIntent() {
         ApiClient.createPaymentIntent(51, "eur", object : RetrofitCallback<PaymentIntentResponse> {
@@ -322,7 +309,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         val btPayForDogWash = findViewById<Button>(R.id.btPayForDogWash)
         val tvCountdown = findViewById<TextView>(R.id.tvCountdown)
 
-        btPayForDogWash.visibility = View.GONE // Hide the button
+        btPayForDogWash.visibility = View.INVISIBLE // Hide the button
         tvCountdown.visibility = View.VISIBLE // Show the countdown
 
         val successMessage = "Payment successful. You have 20 minutes of water."
@@ -330,50 +317,11 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         Toast.makeText(applicationContext, successMessage, Toast.LENGTH_LONG).show()
 
 //        startCountdown(tvCountdown, 20 * 60 * 1000) // 20 minutes in milliseconds
-        startCountdown(tvCountdown, 5000) // 20 minutes in milliseconds
+        startCountdown(tvCountdown, 10000) // 10 seconds in milliseconds
 
     }
 
 
-//    // Step 3 - we've collected the payment method, so it's time to confirm the payment
-//    private val collectPaymentMethodCallback by lazy {
-//        object : PaymentIntentCallback {
-//            override fun onSuccess(paymentIntent: PaymentIntent) {
-//                Terminal.getInstance().confirmPaymentIntent(paymentIntent, confirmPaymentIntentCallback)
-//            }
-//
-//            override fun onFailure(e: TerminalException) {
-//                // Update UI w/ failure
-//            }
-//        }
-//    }
-
-
-    // Step 4 - we've confirmed the payment! Show a success screen
-//    private val confirmPaymentIntentCallback by lazy {
-//        object : PaymentIntentCallback {
-//            override fun onSuccess(paymentIntent: PaymentIntent) {
-//                paymentIntent.id?.let { ApiClient.capturePaymentIntent(it) }
-//                runOnUiThread {
-//                    val btPayForDogWash = findViewById<Button>(R.id.btPayForDogWash)
-//                    val tvCountdown = findViewById<TextView>(R.id.tvCountdown)
-//
-//                    btPayForDogWash.visibility = View.GONE // Hide the button
-//                    tvCountdown.visibility = View.VISIBLE // Show the countdown
-//
-//                    val successMessage = "Payment successful. You have 20 minutes of water."
-//                    speak(successMessage)
-//                    Toast.makeText(applicationContext, successMessage, Toast.LENGTH_LONG).show()
-//
-//                    startCountdown(tvCountdown, 20 * 60 * 1000) // 20 minutes in milliseconds
-//                }
-//            }
-//
-//            override fun onFailure(e: TerminalException) {
-//                // Update UI w/ failure
-//            }
-//        }
-//    }
 
     private fun startPayment() {
         // Step 1: create payment intent
@@ -444,9 +392,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     }
 
     fun startCountdown(tvCountdown: TextView, millisInFuture: Long) {
-        // Triple the font size for the countdown timer
-        val originalTextSize = tvCountdown.textSize
-        tvCountdown.textSize = originalTextSize * 3
+        tvCountdown.textSize = 144f // Sets the font size to 48sp
 
         object : CountDownTimer(millisInFuture, 1000) { // Update every second
             override fun onTick(millisUntilFinished: Long) {
@@ -476,9 +422,11 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 val finishMessage = "Time is up. You can now dry your dog."
                 speak(finishMessage)
                 Toast.makeText(applicationContext, finishMessage, Toast.LENGTH_LONG).show() // Show little pop up message
-                btPayForDogWash.visibility = View.VISIBLE // Show the button
-                tvCountdown.visibility = View.GONE // Hide the countdown
-
+                runOnUiThread {
+                    val btPayForDogWash = findViewById<Button>(R.id.btPayForDogWash)
+                    btPayForDogWash.visibility = View.VISIBLE // Show the button
+                    tvCountdown.visibility = View.INVISIBLE // Hide the countdown
+                }
             }
         }.start()
     }
