@@ -65,7 +65,6 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     }
 
-
     private val viewModel by viewModels<MainActivityViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -165,6 +164,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             Terminal.initTerminal(
                 applicationContext, LogLevel.VERBOSE, TokenProvider(), TerminalEventListener()
             )
+
         } catch (e: TerminalException) {
             throw RuntimeException(
                 "Location services are required in order to initialize " +
@@ -277,9 +277,16 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             override fun onSuccess(paymentIntent: PaymentIntent) {
                 // Payment was successfully confirmed and completed
                 Log.d(TAG, "PaymentIntent confirmed successfully: ${paymentIntent.id}")
+//                viewModel.askForConnectionPermission()
+//                viewModel.getGrantedDevice().observe(this@MainActivity) { device ->
+//                    viewModel.openDeviceAndPort(device)
+//                }
+//                viewModel.serialWrite("O")
                 runOnUiThread {
                     val btPayForDogWash = findViewById<Button>(R.id.btPayForDogWash)
                     val tvCountdown = findViewById<TextView>(R.id.tvCountdown)
+
+
 
                     btPayForDogWash.visibility = View.GONE // Hide the button
                     tvCountdown.visibility = View.VISIBLE // Show the countdown
@@ -301,51 +308,53 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     }
 
 
-    // Step 3 - we've collected the payment method, so it's time to confirm the payment
-    private val collectPaymentMethodCallback by lazy {
-        object : PaymentIntentCallback {
-            override fun onSuccess(paymentIntent: PaymentIntent) {
-                Terminal.getInstance().confirmPaymentIntent(paymentIntent, confirmPaymentIntentCallback)
-            }
-
-            override fun onFailure(e: TerminalException) {
-                // Update UI w/ failure
-            }
-        }
-    }
+//    // Step 3 - we've collected the payment method, so it's time to confirm the payment
+//    private val collectPaymentMethodCallback by lazy {
+//        object : PaymentIntentCallback {
+//            override fun onSuccess(paymentIntent: PaymentIntent) {
+//                Terminal.getInstance().confirmPaymentIntent(paymentIntent, confirmPaymentIntentCallback)
+//            }
+//
+//            override fun onFailure(e: TerminalException) {
+//                // Update UI w/ failure
+//            }
+//        }
+//    }
 
 
     // Step 4 - we've confirmed the payment! Show a success screen
-    private val confirmPaymentIntentCallback by lazy {
-        object : PaymentIntentCallback {
-            override fun onSuccess(paymentIntent: PaymentIntent) {
-                paymentIntent.id?.let { ApiClient.capturePaymentIntent(it) }
-                runOnUiThread {
-                    val btPayForDogWash = findViewById<Button>(R.id.btPayForDogWash)
-                    val tvCountdown = findViewById<TextView>(R.id.tvCountdown)
-
-                    btPayForDogWash.visibility = View.GONE // Hide the button
-                    tvCountdown.visibility = View.VISIBLE // Show the countdown
-
-                    val successMessage = "Payment successful. You have 20 minutes of water."
-                    speak(successMessage)
-                    Toast.makeText(applicationContext, successMessage, Toast.LENGTH_LONG).show()
-
-                    startCountdown(tvCountdown, 20 * 60 * 1000) // 20 minutes in milliseconds
-                }
-            }
-
-            override fun onFailure(e: TerminalException) {
-                // Update UI w/ failure
-            }
-        }
-    }
+//    private val confirmPaymentIntentCallback by lazy {
+//        object : PaymentIntentCallback {
+//            override fun onSuccess(paymentIntent: PaymentIntent) {
+//                paymentIntent.id?.let { ApiClient.capturePaymentIntent(it) }
+//                runOnUiThread {
+//                    val btPayForDogWash = findViewById<Button>(R.id.btPayForDogWash)
+//                    val tvCountdown = findViewById<TextView>(R.id.tvCountdown)
+//
+//                    btPayForDogWash.visibility = View.GONE // Hide the button
+//                    tvCountdown.visibility = View.VISIBLE // Show the countdown
+//
+//                    val successMessage = "Payment successful. You have 20 minutes of water."
+//                    speak(successMessage)
+//                    Toast.makeText(applicationContext, successMessage, Toast.LENGTH_LONG).show()
+//
+//                    startCountdown(tvCountdown, 20 * 60 * 1000) // 20 minutes in milliseconds
+//                }
+//            }
+//
+//            override fun onFailure(e: TerminalException) {
+//                // Update UI w/ failure
+//            }
+//        }
+//    }
 
     private fun startPayment() {
         // Step 1: create payment intent
 //        Terminal.getInstance().createPaymentIntent(paymentIntentParams, createPaymentIntentCallback)
         createPaymentIntent()
     }
+
+
 
     private fun discoverAndConnectReader() {
         // Discover readers
@@ -443,7 +452,5 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             }
         }.start()
     }
-
-
 
 }

@@ -51,21 +51,31 @@ class ArduinoHelper
     fun askForConnectionPermission() {
         val usbDevices = usbManager.deviceList
         _liveInfoOutput.postValue(context.getString(R.string.helper_info_checking_attached_usb_devices))
+        var arduinoFound = false // Flag to check if Arduino is found
+
         if (usbDevices.isNotEmpty()) {
-            for (device in usbDevices) {
+            for (device in usbDevices) { // Use destructuring to get device directly
                 val deviceVID = device.value.vendorId
-                if (deviceVID == 0x2341) { // Arduino vendor ID
+                val devicePID = device.value.productId
+
+                // Check if the device is Arduino
+                if (deviceVID == 0x2341 && devicePID == 0x0043) { // Arduino vendor ID and PID
+                    _liveInfoOutput.postValue(context.getString(R.string.helper_info_arduino_found))
                     connect(device)
-                } else {
-                    _liveErrorOutput.postValue(context.getString(R.string.helper_error_device_not_found))
-                    _liveErrorOutput.postValue(context.getString(R.string.helper_error_connecting_anyway))
-                    connect(device)
+                    arduinoFound = true // Set flag to true when Arduino is found
+                    break // Exit the loop once Arduino is found and connection attempt is made
                 }
+            }
+
+            if (!arduinoFound) {
+                // If loop completes without finding Arduino, post error message
+                _liveErrorOutput.postValue(context.getString(R.string.helper_error_arduino_not_found))
             }
         } else {
             _liveErrorOutput.postValue(context.getString(R.string.helper_error_usb_devices_not_attached))
         }
     }
+
 
     fun disconnect() {
         try {
