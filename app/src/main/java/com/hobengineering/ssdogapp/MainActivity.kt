@@ -316,8 +316,8 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         speak(successMessage)
         Toast.makeText(applicationContext, successMessage, Toast.LENGTH_LONG).show()
 
-//        startCountdown(tvCountdown, 20 * 60 * 1000) // 20 minutes in milliseconds
-        startCountdown(tvCountdown, 10000) // 10 seconds in milliseconds
+        startCountdown(tvCountdown, 20 * 60 * 1000) // 20 minutes in milliseconds
+//        startCountdown(tvCountdown, 10000) // 10 seconds in milliseconds
 
     }
 
